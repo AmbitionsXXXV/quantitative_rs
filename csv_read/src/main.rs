@@ -27,6 +27,14 @@ fn main() {
         println!("row: {:?}", sr.get(0).unwrap());
 
         // 打印所有列数据
-        sr.into_iter().for_each(|c| println!("{}", c))
+        // sr.into_iter().for_each(|c| println!("{}", c))
+        // 使用只读迭代器
+        // sr.iter().for_each(|c| println!("{}", c))
+
+        // 使用 map 遍历
+        let newSt = sr.iter().map(|c| c.to_string()).collect::<Vec<String>>();
+
+        // 最终打印结果为每次循环打印一行数据
+        println!("{:?}", newSt)
     }
 }
