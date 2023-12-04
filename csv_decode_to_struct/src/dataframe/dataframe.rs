@@ -24,6 +24,8 @@ struct DataFrameItem {
     post_adjustment_factor: Option<f64>,   // 前复权因子
     previous_closing_price: Option<f64>,   // 前收盘价
     accumulated_nav_per_unit: Option<f64>, // 累计净值
+    #[serde(skip)]
+    ma5: f64,            // 5日均线
 }
 
 fn date_from_str<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
@@ -101,83 +103,67 @@ pub enum SortField {
 
 impl DataFrame {
     // 根据日期排序
-    pub fn sort(&mut self, field: SortField) -> &Self {
-        match field {
-            SortField::TradeDate => self.data.sort_by(|a, b| a.trade_date.cmp(&b.trade_date)),
-            SortField::Volume => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.volume)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::Turnover => self.data.sort_by(|a, b| {
-                a.turnover
-                    .partial_cmp(&b.turnover)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::NavPerUnit => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.nav_per_unit)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::LowestPrice => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.nav_per_unit)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::HighestPrice => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.nav_per_unit)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::OpeningPrice => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.opening_price)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::ClosingPrice => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.closing_price)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::TurnoverRate => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.turnover_rate)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::PostAdjustmentFactor => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.post_adjustment_factor)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::PreviousClosingPrice => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.previous_closing_price)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
-            SortField::AccumulatedNavPerUnit => self.data.sort_by(|a, b| {
-                a.volume
-                    .partial_cmp(&b.accumulated_nav_per_unit)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }),
+    pub fn sort(&mut self, field: SortField, ascending: bool) -> &mut Self {
+        let comparator = |a: &DataFrameItem, b: &DataFrameItem| match field {
+            SortField::TradeDate => a.trade_date.cmp(&b.trade_date),
+            SortField::Volume => a
+                .volume
+                .partial_cmp(&b.volume)
+                .unwrap_or(std::cmp::Ordering::Equal),
+            SortField::Turnover => a
+                .turnover
+                .partial_cmp(&b.turnover)
+                .unwrap_or(std::cmp::Ordering::Equal),
+            SortField::NavPerUnit => a
+                .nav_per_unit
+                .partial_cmp(&b.nav_per_unit)
+                .unwrap_or(std::cmp::Ordering::Equal),
+            SortField::LowestPrice => a
+                .lowest_price
+                .partial_cmp(&b.lowest_price)
+                .unwrap_or(std::cmp::Ordering::Equal),
+            SortField::HighestPrice => todo!(),
+            SortField::OpeningPrice => todo!(),
+            SortField::ClosingPrice => todo!(),
+            SortField::TurnoverRate => todo!(),
+            SortField::PostAdjustmentFactor => todo!(),
+            SortField::PreviousClosingPrice => todo!(),
+            SortField::AccumulatedNavPerUnit => todo!(),
         };
+
+        if ascending {
+            self.data.sort_by(comparator);
+        } else {
+            self.data.sort_by(|a, b| comparator(b, a));
+        }
 
         self
     }
 
-    pub fn print(&self) {
+    pub fn print(&mut self, include_ma5: bool) {
         let mut table = Table::new();
 
-        table.set_header(TABLE_HEADERS);
+        // 根据 include_ma5 决定是否添加 ma5 列
+        let mut headers = Vec::from(TABLE_HEADERS);
+        if include_ma5 {
+            headers.push("5日均线");
+
+            self.calc_ma5();
+
+            // 时间倒序排
+            self.sort(SortField::TradeDate, false);
+        }
+        table.set_header(headers);
 
         self.data.iter().for_each(|row| {
             let amp = (row.highest_price.unwrap_or_default()
                 - row.lowest_price.unwrap_or_default())
                 / row.previous_closing_price.unwrap_or_default()
                 * 100.0;
-
             let amp = format!("{:.2}%", amp);
 
-            table.add_row(vec![
+            // 根据 include_ma5 决定是否添加 ma5 值
+            let mut row_data = vec![
                 row.trade_date.to_string(),
                 row.stock_name.clone().unwrap_or_default(),
                 row.fund_code.clone().unwrap_or_default(),
@@ -193,9 +179,40 @@ impl DataFrame {
                 row.accumulated_nav_per_unit.unwrap_or_default().to_string(),
                 row.nav_per_unit.unwrap_or_default().to_string(),
                 amp,
-            ]);
+            ];
+
+            if include_ma5 {
+                let ma5 = format!("{:.2}", row.ma5);
+                row_data.push(ma5);
+            }
+
+            table.add_row(row_data);
         });
 
         println!("{table}");
+    }
+
+    fn calc_ma5(&mut self) {
+        let len = self.data.len();
+
+        for index in 0..len {
+            if index + 5 > len {
+                break;
+            }
+
+            let mut sum = 0.0;
+
+            for i in 0..5 {
+                sum += self
+                    .data
+                    .get(index + i)
+                    .unwrap()
+                    .closing_price
+                    .unwrap_or_default();
+            }
+
+            let sum = sum / 5.0; // 计算均值
+            self.data.get_mut(index).unwrap().ma5 = sum // 将均值赋值给 ma5 字段
+        }
     }
 }
