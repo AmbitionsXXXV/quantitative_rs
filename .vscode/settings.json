@@ -3,6 +3,7 @@
     "./Cargo.toml"
   ],
   "cSpell.words": [
-    "chrono"
+    "chrono",
+    "dataframe"
   ]
 }
