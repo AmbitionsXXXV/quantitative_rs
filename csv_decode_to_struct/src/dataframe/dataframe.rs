@@ -10,20 +10,20 @@ use std::io::Cursor;
 struct DataFrameItem {
     // 对应 csv 文件的列名
     #[serde(deserialize_with = "date_from_str")]
-    trade_date: NaiveDate,
-    volume: Option<f64>,
-    turnover: Option<f64>,
-    fund_code: Option<String>,
-    lowest_price: Option<f64>,
-    nav_per_unit: Option<f64>,
-    highest_price: Option<f64>,
-    closing_price: Option<f64>,
-    opening_price: Option<f64>,
-    stock_name: Option<String>,
-    turnover_rate: Option<f64>,
-    post_adjustment_factor: Option<f64>,
-    previous_closing_price: Option<f64>,
-    accumulated_nav_per_unit: Option<f64>,
+    trade_date: NaiveDate, // 交易日期
+    volume: Option<f64>,                   // 成交量
+    turnover: Option<f64>,                 // 成交额
+    fund_code: Option<String>,             // 基金代码
+    lowest_price: Option<f64>,             // 最低价
+    nav_per_unit: Option<f64>,             // 单位净值
+    highest_price: Option<f64>,            // 最高价
+    closing_price: Option<f64>,            // 收盘价
+    opening_price: Option<f64>,            // 开盘价
+    stock_name: Option<String>,            // 股票名字
+    turnover_rate: Option<f64>,            // 换手率
+    post_adjustment_factor: Option<f64>,   // 前复权因子
+    previous_closing_price: Option<f64>,   // 前收盘价
+    accumulated_nav_per_unit: Option<f64>, // 累计净值
 }
 
 fn date_from_str<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
@@ -83,10 +83,82 @@ const TABLE_HEADERS: &[&str] = &[
     "单位净值",
 ];
 
+pub enum SortField {
+    Volume,
+    Turnover,
+    TradeDate,
+    NavPerUnit,
+    LowestPrice,
+    HighestPrice,
+    OpeningPrice,
+    ClosingPrice,
+    TurnoverRate,
+    PostAdjustmentFactor,
+    PreviousClosingPrice,
+    AccumulatedNavPerUnit,
+}
+
 impl DataFrame {
     // 根据日期排序
-    pub fn sort(&mut self) -> &Self {
-        self.data.sort_by(|a, b| a.trade_date.cmp(&b.trade_date));
+    pub fn sort(&mut self, field: SortField) -> &Self {
+        match field {
+            SortField::TradeDate => self.data.sort_by(|a, b| a.trade_date.cmp(&b.trade_date)),
+            SortField::Volume => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.volume)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::Turnover => self.data.sort_by(|a, b| {
+                a.turnover
+                    .partial_cmp(&b.turnover)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::NavPerUnit => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.nav_per_unit)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::LowestPrice => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.nav_per_unit)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::HighestPrice => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.nav_per_unit)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::OpeningPrice => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.opening_price)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::ClosingPrice => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.closing_price)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::TurnoverRate => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.turnover_rate)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::PostAdjustmentFactor => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.post_adjustment_factor)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::PreviousClosingPrice => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.previous_closing_price)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            SortField::AccumulatedNavPerUnit => self.data.sort_by(|a, b| {
+                a.volume
+                    .partial_cmp(&b.accumulated_nav_per_unit)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+        };
 
         self
     }
