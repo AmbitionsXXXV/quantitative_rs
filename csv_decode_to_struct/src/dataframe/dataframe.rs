@@ -7,25 +7,25 @@ use std::fs::read;
 use std::io::Cursor;
 
 #[derive(Default, Debug, Clone, Deserialize)]
-struct DataFrameItem {
+pub struct DataFrameItem {
     // 对应 csv 文件的列名
     #[serde(deserialize_with = "date_from_str")]
     trade_date: NaiveDate, // 交易日期
-    volume: Option<f64>,                   // 成交量
-    turnover: Option<f64>,                 // 成交额
-    fund_code: Option<String>,             // 基金代码
-    lowest_price: Option<f64>,             // 最低价
-    nav_per_unit: Option<f64>,             // 单位净值
-    highest_price: Option<f64>,            // 最高价
-    closing_price: Option<f64>,            // 收盘价
-    opening_price: Option<f64>,            // 开盘价
-    stock_name: Option<String>,            // 股票名字
-    turnover_rate: Option<f64>,            // 换手率
-    post_adjustment_factor: Option<f64>,   // 前复权因子
-    previous_closing_price: Option<f64>,   // 前收盘价
-    accumulated_nav_per_unit: Option<f64>, // 累计净值
+    volume: Option<f64>,                     // 成交量
+    turnover: Option<f64>,                   // 成交额
+    fund_code: Option<String>,               // 基金代码
+    lowest_price: Option<f64>,               // 最低价
+    nav_per_unit: Option<f64>,               // 单位净值
+    highest_price: Option<f64>,              // 最高价
+    closing_price: Option<f64>,              // 收盘价
+    opening_price: Option<f64>,              // 开盘价
+    stock_name: Option<String>,              // 股票名字
+    turnover_rate: Option<f64>,              // 换手率
+    post_adjustment_factor: Option<f64>,     // 前复权因子
+    pub previous_closing_price: Option<f64>, // 前收盘价
+    accumulated_nav_per_unit: Option<f64>,   // 累计净值
     #[serde(skip)]
-    ma5: f64,            // 5日均线
+    ma5: f64,              // 5日均线
 }
 
 fn date_from_str<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
@@ -101,6 +101,8 @@ pub enum SortField {
     AccumulatedNavPerUnit,
 }
 
+type FilterFn = Box<dyn Fn(&DataFrameItem) -> bool>;
+
 impl DataFrame {
     // 根据日期排序
     pub fn sort(&mut self, field: SortField, ascending: bool) -> &mut Self {
@@ -140,7 +142,7 @@ impl DataFrame {
         self
     }
 
-    pub fn print(&mut self, include_ma5: bool) {
+    pub fn print(&mut self, include_ma5: bool, filter: Option<FilterFn>) {
         let mut table = Table::new();
 
         // 根据 include_ma5 决定是否添加 ma5 列
@@ -153,9 +155,15 @@ impl DataFrame {
             // 时间倒序排
             self.sort(SortField::TradeDate, false);
         }
+
+        let mut data: Vec<DataFrameItem> = self.data.clone();
+        if let Some(f) = filter {
+            data = data.into_iter().filter(f).collect();
+        }
+
         table.set_header(headers);
 
-        self.data.iter().for_each(|row| {
+        data.iter().for_each(|row| {
             let amp = (row.highest_price.unwrap_or_default()
                 - row.lowest_price.unwrap_or_default())
                 / row.previous_closing_price.unwrap_or_default()
