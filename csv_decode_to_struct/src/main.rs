@@ -11,6 +11,7 @@ const CSV_PATH: &str = "./csv_read/588460.SH.csv";
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 struct DataFrame {
+    // 对应 csv 文件的列名
     trade_date: Option<String>,
     stock_name: Option<String>,
 }
