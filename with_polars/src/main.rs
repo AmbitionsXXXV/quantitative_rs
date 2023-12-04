@@ -83,7 +83,7 @@ fn calc_ma5(df: &mut DataFrame) -> Result<(), PolarsError> {
         window_size: Duration::new(5),
         ..Default::default()
     };
-    let ma5 = closing_price.reverse().rolling_mean(opt)?;
+    let ma5 = closing_price.reverse().rolling_mean(opt)?.reverse();
 
     let ma5 = Series::new("MA5", ma5);
 
