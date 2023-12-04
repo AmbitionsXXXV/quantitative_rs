@@ -1,4 +1,5 @@
 use chrono::NaiveDate;
+use comfy_table::Table;
 use csv::Reader;
 use encoding_rs::GBK;
 use serde::{de, Deserialize};
@@ -62,5 +63,58 @@ impl From<&str> for DataFrame {
         });
 
         DataFrame { data: _data }
+    }
+}
+
+const TABLE_HEADERS: &[&'static str] = &[
+    "交易日期",
+    "基金名字",
+    "股票代码",
+    "股票名字",
+    "开盘价",
+    "收盘价",
+    "最高价",
+    "最低价",
+    "成交量",
+    "成交额",
+    "换手率",
+    "前复权因子",
+    "累计净值",
+    "单位净值",
+];
+
+impl DataFrame {
+    // 根据日期排序
+    pub fn sort(&mut self) -> &Self {
+        self.data.sort_by(|a, b| a.trade_date.cmp(&b.trade_date));
+
+        self
+    }
+
+    pub fn print(&self) {
+        let mut table = Table::new();
+
+        table.set_header(TABLE_HEADERS);
+
+        self.data.iter().for_each(|row| {
+            table.add_row(vec![
+                row.trade_date.to_string(),
+                row.fund_code.clone().unwrap_or_default(),
+                row.stock_name.clone().unwrap_or_default(),
+                row.stock_name.clone().unwrap_or_default(),
+                row.opening_price.unwrap_or_default().to_string(),
+                row.closing_price.unwrap_or_default().to_string(),
+                row.highest_price.unwrap_or_default().to_string(),
+                row.lowest_price.unwrap_or_default().to_string(),
+                row.volume.unwrap_or_default().to_string(),
+                row.turnover.unwrap_or_default().to_string(),
+                row.turnover_rate.unwrap_or_default().to_string(),
+                row.post_adjustment_factor.unwrap_or_default().to_string(),
+                row.accumulated_nav_per_unit.unwrap_or_default().to_string(),
+                row.nav_per_unit.unwrap_or_default().to_string(),
+            ]);
+        });
+
+        println!("{table}");
     }
 }

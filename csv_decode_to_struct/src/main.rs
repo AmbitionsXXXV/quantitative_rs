@@ -8,5 +8,6 @@ const CSV_PATH: &str = "./588460.SH.csv";
 
 fn main() {
     let mut df = DataFrame::from(CSV_PATH);
-    println!("{:?}", df);
+    // println!("{:?}", df);
+    df.sort().print();
 }
