@@ -1,6 +1,7 @@
+use chrono::NaiveDate;
 use csv::Reader;
 use encoding_rs::GBK;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize};
 use std::fs::read;
 use std::io::Cursor;
 
@@ -9,11 +10,20 @@ use std::io::Cursor;
 // 要使用相对路径读取子项目的 csv 文件，则需要使用如下相对路径
 const CSV_PATH: &str = "./csv_read/588460.SH.csv";
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 struct DataFrame {
     // 对应 csv 文件的列名
-    trade_date: Option<String>,
+    #[serde(deserialize_with = "date_from_str")]
+    trade_date: NaiveDate,
     stock_name: Option<String>,
+}
+
+fn date_from_str<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s: String = Deserialize::deserialize(deserializer)?;
+    NaiveDate::parse_from_str(&s, "%Y-%m-%d").map_err(de::Error::custom)
 }
 
 fn main() {
@@ -32,6 +42,7 @@ fn main() {
     // 读取 csv 数据，并反序列化为 struct
     rdr.deserialize().for_each(|r| {
         let record: DataFrame = r.unwrap();
-        println!("{:?}", record);
+        println!("stock_name: {:?}", record.stock_name.unwrap());
+        println!("trade_date: {:?}", record.trade_date);
     });
 }
