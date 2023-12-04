@@ -66,7 +66,7 @@ impl From<&str> for DataFrame {
     }
 }
 
-const TABLE_HEADERS: &[&'static str] = &[
+const TABLE_HEADERS: &[&str] = &[
     "交易日期",
     "基金名字",
     "股票代码",
@@ -111,6 +111,7 @@ impl DataFrame {
                 row.turnover_rate.unwrap_or_default().to_string(),
                 row.post_adjustment_factor.unwrap_or_default().to_string(),
                 row.accumulated_nav_per_unit.unwrap_or_default().to_string(),
+                row.previous_closing_price.unwrap_or_default().to_string(),
                 row.nav_per_unit.unwrap_or_default().to_string(),
             ]);
         });
