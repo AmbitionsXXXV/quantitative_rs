@@ -32,9 +32,9 @@ fn main() {
         // sr.iter().for_each(|c| println!("{}", c))
 
         // 使用 map 遍历
-        let newSt = sr.iter().map(|c| c.to_string()).collect::<Vec<String>>();
+        let new_st = sr.iter().map(|c| c.to_string()).collect::<Vec<String>>();
 
         // 最终打印结果为每次循环打印一行数据
-        println!("{:?}", newSt)
+        println!("{:?}", new_st)
     }
 }
