@@ -81,6 +81,7 @@ const TABLE_HEADERS: &[&str] = &[
     "前复权因子",
     "累计净值",
     "单位净值",
+    "振幅",
 ];
 
 pub enum SortField {
@@ -169,6 +170,13 @@ impl DataFrame {
         table.set_header(TABLE_HEADERS);
 
         self.data.iter().for_each(|row| {
+            let amp = (row.highest_price.unwrap_or_default()
+                - row.lowest_price.unwrap_or_default())
+                / row.previous_closing_price.unwrap_or_default()
+                * 100.0;
+
+            let amp = format!("{:.2}%", amp);
+
             table.add_row(vec![
                 row.trade_date.to_string(),
                 row.stock_name.clone().unwrap_or_default(),
@@ -184,6 +192,7 @@ impl DataFrame {
                 row.post_adjustment_factor.unwrap_or_default().to_string(),
                 row.accumulated_nav_per_unit.unwrap_or_default().to_string(),
                 row.nav_per_unit.unwrap_or_default().to_string(),
+                amp,
             ]);
         });
 
