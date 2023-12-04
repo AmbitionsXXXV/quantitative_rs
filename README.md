@@ -5,3 +5,22 @@
 ```bash
 cargo run -p <members name>
 ```
+
+### with_polars
+
+convert gbk CSV to utf8 parquet
+
+```rs
+mod convert;
+use convert::gbk_to_utf8::{Converter, GbkToUtf8Converter};
+
+const CSV_PATH: &str = "./588460.SH.csv";
+const NEW_CSV_PATH: &str = "./588460_utf8.csv";
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let converter = Converter;
+    converter.convert(CSV_PATH, NEW_CSV_PATH)?;
+
+    Ok(())
+}
+```

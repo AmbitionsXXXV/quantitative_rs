@@ -3,4 +3,4 @@
 [workspace]
 resolver = "2"
 
-members = ["csv_read", "csv_decode_to_struct"]
+members = ["csv_read", "csv_decode_to_struct", "with_polars"]
