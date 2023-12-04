@@ -70,7 +70,7 @@ const TABLE_HEADERS: &[&str] = &[
     "交易日期",
     "基金名字",
     "股票代码",
-    "股票名字",
+    "前收盘价",
     "开盘价",
     "收盘价",
     "最高价",
@@ -171,9 +171,9 @@ impl DataFrame {
         self.data.iter().for_each(|row| {
             table.add_row(vec![
                 row.trade_date.to_string(),
+                row.stock_name.clone().unwrap_or_default(),
                 row.fund_code.clone().unwrap_or_default(),
-                row.stock_name.clone().unwrap_or_default(),
-                row.stock_name.clone().unwrap_or_default(),
+                row.previous_closing_price.unwrap_or_default().to_string(),
                 row.opening_price.unwrap_or_default().to_string(),
                 row.closing_price.unwrap_or_default().to_string(),
                 row.highest_price.unwrap_or_default().to_string(),
@@ -183,7 +183,6 @@ impl DataFrame {
                 row.turnover_rate.unwrap_or_default().to_string(),
                 row.post_adjustment_factor.unwrap_or_default().to_string(),
                 row.accumulated_nav_per_unit.unwrap_or_default().to_string(),
-                row.previous_closing_price.unwrap_or_default().to_string(),
                 row.nav_per_unit.unwrap_or_default().to_string(),
             ]);
         });
