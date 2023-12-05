@@ -1,3 +1,4 @@
+use calc::calc_amp;
 // 在 main.rs
 use polars::prelude::*;
 
@@ -27,6 +28,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 替换列名
     df.set_column_names(TABLE_HEADERS)?;
+
+    calc_amp(&mut df)?;
 
     println!("{:?}", df);
 

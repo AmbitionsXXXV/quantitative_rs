@@ -1,5 +1,9 @@
 use polars::prelude::*;
 
+pub fn add(left: usize, right: usize) -> usize {
+    left + right
+}
+
 /// 用于计算振幅
 pub fn calc_amp(df: &mut DataFrame) -> Result<(), PolarsError> {
     // 获取列数
@@ -47,4 +51,15 @@ pub fn calc_ma(df: &mut DataFrame, days: usize, col: &str) -> Result<(), PolarsE
     df.insert_column(len, ma5)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
 }

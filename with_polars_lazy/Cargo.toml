@@ -11,5 +11,5 @@ path = "src/main.rs"
 
 [dependencies]
 rustfmt = { workspace = true }
-with_polars = { path = "../with_polars" }
+calc = { path = "../calc" }
 polars = { version = "*", features = ["lazy", "rolling_window", "round_series"] }
