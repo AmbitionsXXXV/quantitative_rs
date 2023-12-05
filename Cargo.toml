@@ -3,7 +3,15 @@
 [workspace]
 resolver = "2"
 
-members = ["calc", "csv_read", "convert_csv", "csv_decode_to_struct", "with_polars", "with_polars_lazy"]
+members = [
+  "calc",
+  "inject_db",
+  "csv_read",
+  "convert_csv",
+  "csv_decode_to_struct",
+  "with_polars",
+  "with_polars_lazy",
+]
 
 [workspace.dependencies]
 encoding_rs = "0.8.33"
