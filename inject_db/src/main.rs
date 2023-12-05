@@ -9,13 +9,13 @@ async fn main() -> Result<(), Error> {
 
     // 其他逻辑
 
-    let rows = sqlx::query("SELECT tel FROM aimyon.user")
+    let rows = sqlx::query("SELECT id,name,age FROM rust_quant.users")
         .fetch_all(&pool)
         .await?;
 
     rows.iter().for_each(|row| {
-        let tel: String = row.get("tel");
-        println!("电话号码: {}", tel);
+        let id = row.get::<i32, _>("id");
+        println!("电话号码: {}", id);
     });
 
     Ok(())
