@@ -1,4 +1,4 @@
-use encoding_rs::{GB18030, GBK};
+use encoding_rs::GBK;
 use polars::prelude::*;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
