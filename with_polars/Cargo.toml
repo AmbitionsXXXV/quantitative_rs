@@ -10,7 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 encoding_rs = "0.8.33"
-encoding_rs_io = "*"
 rustfmt = "*"
 polars = { version = "*", features = ["rolling_window", "round_series"] }
 rand = "*"

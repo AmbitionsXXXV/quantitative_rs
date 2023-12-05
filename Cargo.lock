@@ -472,15 +472,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "encoding_rs_io"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1cc3c5651fb62ab8aa3103998dade57efdd028544bd300516baa31840c252a83"
-dependencies = [
- "encoding_rs",
-]
-
-[[package]]
 name = "enum_dispatch"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2275,7 +2266,6 @@ dependencies = [
  "chrono",
  "color-eyre",
  "encoding_rs",
- "encoding_rs_io",
  "polars",
  "rand 0.8.5",
  "rustfmt",

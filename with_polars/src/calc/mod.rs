@@ -1,5 +1,6 @@
 use polars::prelude::*;
 
+/// 用于计算振幅
 pub fn calc_amp(df: &mut DataFrame) -> Result<(), PolarsError> {
     // 获取列数
     let len = df.width();
@@ -26,6 +27,7 @@ pub fn calc_amp(df: &mut DataFrame) -> Result<(), PolarsError> {
     Ok(())
 }
 
+/// 用于计算移动平均线
 pub fn calc_ma(df: &mut DataFrame, days: usize, col: &str) -> Result<(), PolarsError> {
     // 获取列数
     let len = df.width();
