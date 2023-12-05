@@ -1,37 +1,25 @@
-use calc::calc_amp;
-// 在 main.rs
 use polars::prelude::*;
 
-// const CSV_PATH: &str = "./588460.SH.csv";
-const NEW_CSV_PATH: &str = "./588460_utf8.csv";
-
-const TABLE_HEADERS: &[&str] = &[
-    "交易日期",
-    "基金名字",
-    "股票代码",
-    "前收盘价",
-    "开盘价",
-    "最高价",
-    "最低价",
-    "收盘价",
-    "成交量",
-    "成交额",
-    "累计净值",
-    "单位净值",
-    "前复权因子",
-    "换手率",
-];
+const NEW_CSV_PATH: &str = "./2023-12-03_new.csv";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 读取 CSV 文件
-    let mut df = CsvReader::from_path(NEW_CSV_PATH)?.finish()?;
+    let df = CsvReader::from_path(NEW_CSV_PATH)?.finish()?;
 
-    // 替换列名
-    df.set_column_names(TABLE_HEADERS)?;
+    // eager api 与 lazy api 的区别
+    // eager api 会立即执行，而 lazy api 会在调用 collect 时才执行
+    // eager api 使用 group_by
+    let g = df.group_by(["股票代码"])?.count()?;
 
-    calc_amp(&mut df)?;
+    // lazy api 使用 group_by
+    let lg = df
+        .lazy()
+        .group_by(["股票代码"])
+        .agg([col("发布日期").alias("数量").count()])
+        .collect()?;
 
-    println!("{:?}", df);
+    println!("{:?}", g);
+    println!("{:?}", lg);
 
     Ok(())
 }
