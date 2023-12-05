@@ -953,8 +953,13 @@ dependencies = [
 name = "inject_db"
 version = "0.1.0"
 dependencies = [
+ "calc",
+ "convert_csv",
+ "polars",
+ "rustfmt",
  "sqlx",
  "tokio",
+ "with_polars_lazy",
 ]
 
 [[package]]
