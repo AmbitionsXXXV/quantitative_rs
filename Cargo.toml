@@ -1,6 +1,11 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package]
+name = "quantitative_rs"
+version = "0.1.0"
+authors = ["etcetera <yilonglei790@gmail.com>"]
+
 [workspace]
 resolver = "2"
 
-members = ["csv_read", "csv_decode_to_struct", "with_polars"]
+members = ["csv_read", "csv_decode_to_struct", "with_polars", "with_polars_lazy"]
