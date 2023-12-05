@@ -1,4 +1,4 @@
-use encoding_rs::GB18030;
+use encoding_rs::{GB18030, GBK};
 use polars::prelude::*;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
@@ -18,7 +18,7 @@ impl GbkToUtf8Converter for Converter {
         file.read_to_end(&mut buffer)?;
 
         // 将GBK编码转换为UTF-8
-        let (cow, _, _) = GB18030.decode(&buffer);
+        let (cow, _, _) = GBK.decode(&buffer);
         let data_utf8 = cow.as_ref();
 
         // 将UTF-8数据写入临时文件
