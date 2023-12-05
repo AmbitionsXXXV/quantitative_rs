@@ -13,4 +13,4 @@ path = "src/main.rs"
 rustfmt = { workspace = true }
 calc = { path = "../calc" }
 convert_csv = { path = "../convert_csv" }
-polars = { version = "*", features = ["lazy", "rolling_window", "round_series"] }
+polars = { version = "0.35.4", features = ["lazy", "strings", "lazy_regex"] }
