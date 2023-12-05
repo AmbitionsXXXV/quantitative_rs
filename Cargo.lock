@@ -2277,6 +2277,7 @@ name = "with_polars_lazy"
 version = "0.1.0"
 dependencies = [
  "polars",
+ "rustfmt",
  "with_polars",
 ]
 

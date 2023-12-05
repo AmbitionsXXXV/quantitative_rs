@@ -9,11 +9,11 @@ name = "csv_decode_to_struct"
 path = "src/main.rs"
 
 [dependencies]
+encoding_rs = { workspace = true }
+rustfmt = { workspace = true }
 csv = "1.3.0"
-encoding_rs = "0.8.33"
 serde = {version = "*",features = ["derive"]}
 serde_json = "*"
 serde_with = "*"
-rustfmt = "*"
 chrono = "0.4.31"
 comfy-table = "*"
