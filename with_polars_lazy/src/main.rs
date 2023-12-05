@@ -1,4 +1,5 @@
 use polars::prelude::*;
+use with_polars_lazy::filter_csv_lazy;
 
 const NEW_CSV_PATH: &str = "./2023-12-03_new.csv";
 
@@ -11,11 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .finish()?
         .collect()?;
 
-    // 过滤股票代码为 sh6002 开头的数据
-    let df = df
-        .lazy()
-        .filter(col("股票代码").str().contains(lit("^sh6002"), false))
-        .collect()?;
+    let df = filter_csv_lazy(df, "^sh6002")?;
 
     println!("{:?}", df);
     // eager api 与 lazy api 的区别
