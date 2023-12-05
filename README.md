@@ -6,13 +6,19 @@
 cargo run -p <members name>
 ```
 
-### with_polars
+### convert_csv
 
 convert gbk CSV to utf8 parquet
 
+add `convert_csv` to your `Cargo.toml`
+
+```toml
+[dependencies]
+convert_csv = { path = "../convert_csv" }
+```
+
 ```rs
-mod convert;
-use convert::gbk_to_utf8::{Converter, GbkToUtf8Converter};
+use convert_csv::{Converter, GbkToUtf8Converter};
 
 const CSV_PATH: &str = "./588460.SH.csv";
 const NEW_CSV_PATH: &str = "./588460_utf8.csv";
