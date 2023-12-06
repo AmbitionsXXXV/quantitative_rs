@@ -1,12 +1,13 @@
-// 导入所需的库和模块
+use once_cell::sync::OnceCell;
 use polars::prelude::*;
-use sqlx::{mysql::MySqlPoolOptions, Error, Row};
+use sqlx::{mysql::MySqlPoolOptions, Error, MySql, Pool, Row};
 use with_polars_lazy::filter_csv_lazy;
 
 // 定义将要读取的 CSV 文件路径
 const NEW_CSV_PATH: &str = "./2023-12-03_new.csv";
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), PolarsError> {
     // 使用 LazyCsvReader 从文件路径读取 CSV 数据，并将其转换为 DataFrame
     let df = LazyCsvReader::new(NEW_CSV_PATH) // 创建一个新的 LazyCsvReader 实例，指定 CSV 文件路径
         .has_header(true) // 设置 CSV 文件包含表头
@@ -19,33 +20,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 打印过滤后的 DataFrame
     println!("{:?}", df);
 
-    // 创建一个新的 Tokio 运行时
-    let rt = tokio::runtime::Runtime::new()?; // 创建并初始化一个新的 Tokio 运行时
+    // 设置全局链接池
+    POOL.set(
+        MySqlPoolOptions::new() // 创建一个新的 MySqlPoolOptions 实例
+            .max_connections(10) // 设置连接池的最大连接数为 10
+            .connect("mysql://root:etc123456@localhost:3306/rust_quant") // 连接到 MySQL 数据库，指定连接字符串
+            .await
+            .unwrap(),
+    )
+    .unwrap(); // 等待异步连接操作完成
 
-    // 创建一个本地任务集
-    let local_set = tokio::task::LocalSet::new(); // 创建一个新的本地任务集
-
-    // 在本地任务集上启动 insert 异步函数
-    let handle = local_set.spawn_local(async {
-        insert().await.unwrap(); // 使用 spawn_local 在本地任务集上启动 insert 异步函数
-    });
-
-    local_set.block_on(&rt, handle)?; // 在 Tokio 运行时上执行并等待异步任务完成
+    insert().await.unwrap();
 
     Ok(())
 }
 
+static POOL: OnceCell<Pool<MySql>> = OnceCell::new();
+
 // 异步函数用于操作数据库
 async fn insert() -> Result<(), Error> {
     // 创建并配置 MySQL 连接池
-    let pool = MySqlPoolOptions::new() // 创建一个新的 MySqlPoolOptions 实例
-        .max_connections(10) // 设置连接池的最大连接数为 10
-        .connect("mysql://<username>:<password>@localhost:<port>/<db_name>") // 连接到 MySQL 数据库，指定连接字符串
-        .await?; // 等待异步连接操作完成
 
     // 执行 SQL 查询，从 rust_quant.users 表中获取数据
     let rows = sqlx::query("SELECT id, name, age FROM rust_quant.users")
-        .fetch_all(&pool) // 向数据库发送查询并获取所有结果
+        .fetch_all(POOL.get().unwrap()) // 向数据库发送查询并获取所有结果
         .await?; // 等待异步查询操作完成
 
     // 遍历查询结果并打印
@@ -59,7 +57,7 @@ async fn insert() -> Result<(), Error> {
     let new_row = sqlx::query("INSERT INTO users(name, age) VALUES (?, ?)")
         .bind("aimyon") // 绑定第一个参数 'aimyon' 到 SQL 查询
         .bind(28) // 绑定第二个参数 '28' 到 SQL 查询
-        .execute(&pool) // 向数据库发送插入命令
+        .execute(POOL.get().unwrap()) // 向数据库发送插入命令
         .await?; // 等待异步插入操作完成
 
     // 打印插入操作的结果

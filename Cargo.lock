@@ -955,6 +955,7 @@ version = "0.1.0"
 dependencies = [
  "calc",
  "convert_csv",
+ "once_cell",
  "polars",
  "rustfmt",
  "sqlx",
