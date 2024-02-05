@@ -11,6 +11,7 @@ members = [
   "csv_decode_to_struct",
   "with_polars",
   "with_polars_lazy",
+  "discounted_cash_flow_rate",
 ]
 
 [workspace.dependencies]
