@@ -12,16 +12,16 @@ fn main() {
     // 以二进制格式读取整个文件内容
     let data = read(CSV_PATH).expect("无法读取文件");
 
-    // 将GBK编码的数据转换为UTF-8
+    // 将 GBK 编码的数据转换为 UTF-8
     let (cow, _, _) = GBK.decode(&data);
 
-    // 创建一个内存中的Cursor，以便csv库可以从中读取
+    // 创建一个内存中的 Cursor，以便 csv 库可以从中读取
     let cursor = Cursor::new(cow.as_bytes());
 
-    // 使用Cursor创建CSV读取器
+    // 使用 Cursor 创建 CSV 读取器
     let mut rdr = Reader::from_reader(cursor);
 
-    // 逐行读取CSV
+    // 逐行读取 CSV
     for sr in rdr.records().flatten() {
         // 打印第一列数据
         println!("row: {:?}", sr.get(0).unwrap());

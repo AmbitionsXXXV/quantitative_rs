@@ -47,13 +47,13 @@ impl From<&str> for DataFrame {
         // 以二进制格式读取整个文件内容
         let data = read(path).expect("无法读取文件");
 
-        // 将GBK编码的数据转换为UTF-8
+        // 将 GBK 编码的数据转换为 UTF-8
         let (cow, _, _) = GBK.decode(&data);
 
-        // 创建一个内存中的Cursor，以便csv库可以从中读取
+        // 创建一个内存中的 Cursor，以便 csv 库可以从中读取
         let cursor = Cursor::new(cow.as_bytes());
 
-        // 使用Cursor创建CSV读取器
+        // 使用 Cursor 创建 CSV 读取器
         let mut csv_data = Reader::from_reader(cursor);
 
         csv_data.deserialize().for_each(|r| {
